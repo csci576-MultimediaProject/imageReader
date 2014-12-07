@@ -1,6 +1,7 @@
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -8,28 +9,26 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import javax.swing.*;
+
 
 public class imageReader {
 
 	static int counter = 0; /* count how many files in a folder */
 
 	public static void main(String[] args) {
+		
 		final File dir = new File(args[0]);
 		int width = 352;
 		int height = 288;
 		imageReader imr = new imageReader();
 
-		// array of supported extensions (use a List if you prefer)
-		final String[] EXTENSIONS = new String[] { "rgb" // and other formats
-															// you need
+		/* array of supported extensions */
+		final String[] EXTENSIONS = new String[] { 
+				"rgb" /* and other formats if needed */
 		};
 
-		// filter to identify images based on their extensions
+		/* filter to identify images based on their extensions */
 		final FilenameFilter IMAGE_FILTER = new FilenameFilter() {
 			@Override
 			public boolean accept(final File dir, final String name) {
@@ -42,91 +41,90 @@ public class imageReader {
 			}
 		};
 
-		if (dir.isDirectory()) { // make sure it's a directory
+		if (dir.isDirectory()) { /* make sure it's a directory */
 			for (final File file : dir.listFiles(IMAGE_FILTER)) {
 				counter++;
 			}
 			System.out.println("total file in this folder : " + counter);
 		}
 
-		int frameRate = 30; // frameRate is 30
+		int frameRate = 30; /* frameRate is 30 */
+		
 		JFrame frame = new JFrame("Image Collage");
 		frame.setVisible(true);
-		BufferedImage tmpImg = new BufferedImage(352, 288,
-				BufferedImage.TYPE_INT_RGB);
-		// JLabel label[] = new JLabel [counter];
-		JPanel panel = new JPanel(new GridLayout((counter / 5), 5, 1, 1));
-
+		JPanel panel = new JPanel(new GridLayout((counter / 10), 10));
+		
+		
 		for (final File file : dir.listFiles(IMAGE_FILTER)) {
 
 			try {
 				InputStream is = new FileInputStream(file);
 
-				long len = file.length(); // Calculate input file size
-				// System.out.println("File length : " + len); // Print input
-				// file size
-				double framelen = (len / (width * height * 3)); // Calculate
-																// input//
-																// file's frames
-				// System.out.println("Numbers of frames : " + framelen); //
-				// Print// input// file's// frames
-				BufferedImage frameA[] = new BufferedImage[(int) framelen]; // Set//
-																			// the//
-																			// frame//
-																			// array
+				long len = file.length(); /* Calculate input file size */
+				// System.out.println("File length : " + len); /* Print input file size */
+				double framelen = (len / (width * height * 3)); /* Calculate inputfile's frames */
+				// System.out.println("Numbers of frames : " + framelen); /* Print input file's frames */
+				BufferedImage frameA[] = new BufferedImage[(int) framelen]; /* Set the frame array */
 
 				byte[] bytes = new byte[(int) len];
 
 				int offset = 0;
 				int numRead = 0;
-				while (offset < bytes.length
-						&& (numRead = is.read(bytes, offset, bytes.length
-								- offset)) >= 0) {
+				while (offset < bytes.length && (numRead = is.read(bytes, offset, bytes.length - offset)) >= 0) {
 					offset += numRead;
 				}
 
 				for (int i = 0; i < framelen; i++) {
-					BufferedImage img = new BufferedImage(width, height,
-							BufferedImage.TYPE_INT_RGB);
+					BufferedImage img = new BufferedImage(width, height,BufferedImage.TYPE_INT_RGB);
 					int ind = 0;
 					for (int y = 0; y < height; y++) {
 						for (int x = 0; x < width; x++) {
 
 							byte a = 0;
 							byte r = bytes[i * width * height * 3 + ind];
-							byte g = bytes[i * width * height * 3 + ind
-									+ height * width];
-							byte b = bytes[i * width * height * 3 + ind
-									+ height * width * 2];
+							byte g = bytes[i * width * height * 3 + ind + height * width];
+							byte b = bytes[i * width * height * 3 + ind + height * width * 2];
 
-							int pix = 0xff000000 | ((r & 0xff) << 16)
-									| ((g & 0xff) << 8) | (b & 0xff);
+							int pix = 0xff000000 | ((r & 0xff) << 16) | ((g & 0xff) << 8) | (b & 0xff);
 							img.setRGB(x, y, pix);
 							ind++;
 						}
 					}
 					frameA[i] = img;
-					System.out.println(" width " + i + " : "
-							+ frameA[i].getWidth());
-					System.out.println(" height" + i + " : "
-							+ frameA[i].getHeight());
+					//System.out.println(" width " + i + " : " + frameA[i].getWidth());
+					//System.out.println(" height" + i + " : " + frameA[i].getHeight());
 				}
 
-				// you probably want something more involved here
-				// to display in your UI
-				System.out.println("image: " + file.getName());
-				System.out.println(" size  : " + file.length());
-				imr.histogram(frameA[0]);
+				//System.out.println("image: " + file.getName());
+				//System.out.println(" size  : " + file.length());
+				  imr.histogram(frameA[0]);
 				// imr.display(frameA);
-
-				for (int j = 0; j < frameA.length; j++) {
-					JLabel label = new JLabel(new ImageIcon(frameA[j]));
-
-					panel.add(label);
+			
+				for ( int j = 0; j < frameA.length; j++) {
+					//JLabel label = new JLabel(new StretchIcon(frameA[j]));
+					JButton framebutton = new JButton(new StretchIcon(frameA[j]));
+					framebutton.setBorder(BorderFactory.createEmptyBorder());
+					framebutton.setContentAreaFilled(false);
+					panel.add(framebutton);
 					frame.getContentPane().add(panel, BorderLayout.CENTER);
 					frame.pack();
+					
+					framebutton.addActionListener(new ActionListener() {
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							// TODO Auto-generated method stub
+							System.out.println("image: " + file.getName() +" is Clicked");
+							JFrame showframe = new JFrame("image: " + file.getName());
+							for (int i = 0; i < frameA.length; i++) {
+								JLabel showlabel = new JLabel(new ImageIcon(frameA[i]));
+								showframe.getContentPane().add(showlabel, BorderLayout.CENTER);
+								showframe.pack();
+								showframe.setVisible(true);
+							}
+						}
+			        }); 
 
-					// Determine the frame rate
+					/* Determine the frame rate */
 					try {
 						Thread.sleep(1000 / frameRate);
 					} catch (InterruptedException e) {
@@ -134,16 +132,19 @@ public class imageReader {
 						e.printStackTrace();
 					}
 
-					// Determine not to remove last image
+					/* Determine not to remove last image */
 					if (j < frameA.length - 1) {
 						frame.getContentPane().removeAll();
 					}
 				}
+				
+				 
 
 			} catch (final IOException e) {
 				/* handle errors here */
 			}
 		}
+		
 
 	}
 
