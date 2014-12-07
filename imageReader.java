@@ -28,6 +28,7 @@ public class imageReader {
 		System.out.println("Filename : " + fileName); // print filename
 
 		imageReader imr = new imageReader();
+		
 
 		try {
 			File file = new File(args[0]);
@@ -38,6 +39,8 @@ public class imageReader {
 			double framelen = (len / (width * height * 3)); // Calculate input// file's frames
 			System.out.println("Numbers of frames : " + framelen); // Print// input// file's// frames
 			BufferedImage frameA[] = new BufferedImage[(int) framelen]; // Set// the// frame// array
+			
+			//System.out.println("-------------"+hit.getHistogram());
 
 			byte[] bytes = new byte[(int) len];
 
@@ -69,8 +72,8 @@ public class imageReader {
 				}
 				frameA[i] = img;
 			}
-
 			is.close(); // Close file read
+			imr.histogram(frameA[0]);
 			imr.display(frameA);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
@@ -121,4 +124,36 @@ public class imageReader {
 
 		return rgb;
 	}
+	
+	//Function Histogram
+	public int[][] histogram(BufferedImage image){
+		
+		int[][] hgm = new int[256][3];	//stands for hgm[x axis][r,g,b]
+		imageReader imr = new imageReader();
+		
+		for(int i=0; i < image.getHeight(); i++){
+			for(int j=0; j < image.getWidth(); j++){	
+				for(int k=0; k < 256; k++){
+					if(imr.getrgb(image, j, i)[0]==k){
+						hgm[k][0]++;
+					}
+					if(imr.getrgb(image, j, i)[1]==k){
+						hgm[k][1]++;
+					}
+					if(imr.getrgb(image, j, i)[2]==k){
+						hgm[k][2]++;
+					}
+				}
+			}
+		}
+		
+		for(int i=0; i < 256; i++){
+			System.out.println("hgmR"+i+":"+hgm[i][0]);
+			System.out.println("hgmG"+i+":"+hgm[i][1]);
+			System.out.println("hgmB"+i+":"+hgm[i][2]);
+		}
+		
+		return hgm;
+	}
+	
 }
