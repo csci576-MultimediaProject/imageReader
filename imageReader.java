@@ -87,6 +87,7 @@ public class imageReader {
                     // to display in your UI
                     System.out.println("image: " + file.getName());
                     System.out.println(" size  : " + file.length());
+		    imr.histogram(frameA[0]);
                     imr.display(frameA);
                 } catch (final IOException e) {
                     /* handle errors here */
