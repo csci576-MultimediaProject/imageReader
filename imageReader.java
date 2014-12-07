@@ -21,7 +21,7 @@ public class imageReader {
 		int width = 352;
 		int height = 288;
 		
-		imageReadertest imr = new imageReadertest();
+		imageReader imr = new imageReader();
 
 		// array of supported extensions (use a List if you prefer)
 		final String[] EXTENSIONS = new String[]{
