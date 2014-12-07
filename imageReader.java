@@ -167,6 +167,7 @@ public class imageReader {
 	public int[][] histogram(BufferedImage image) {
 
 		int[][] hgm = new int[256][3]; // stands for hgm[x axis][r,g,b]
+		int[][] yuv = new int[256][3]; // stands for yuv[x axis][y,u,v]
 		imageReader imr = new imageReader();
 
 		for (int i = 0; i < image.getHeight(); i++) {
@@ -184,14 +185,44 @@ public class imageReader {
 				}
 			}
 		}
-
+		
+		/*//Check output with rgb format
 		for (int i = 0; i < 256; i++) {
 			System.out.println("hgmR" + i + ":" + hgm[i][0]);
 			System.out.println("hgmG" + i + ":" + hgm[i][1]);
 			System.out.println("hgmB" + i + ":" + hgm[i][2]);
 		}
-
-		return hgm;
+		*/
+		
+		//Calculate with YUV
+		for (int i = 0; i < image.getHeight(); i++) {
+			for (int j = 0; j < image.getWidth(); j++) {
+				for (int k = 0; k < 256; k++) {
+					int y = (int)((imr.getrgb(image, j, i)[0]*0.299)+imr.getrgb(image, j, i)[1]*0.587+imr.getrgb(image, j, i)[2]*0.114);
+					int u = (int)((imr.getrgb(image, j, i)[0]*(-0.147))+imr.getrgb(image, j, i)[1]*(-0.289)+imr.getrgb(image, j, i)[2]*0.436);
+					int v = (int)((imr.getrgb(image, j, i)[0]*0.615)+imr.getrgb(image, j, i)[1]*(-0.515)+imr.getrgb(image, j, i)[2]*(-0.100));
+					if (y == k) {
+						yuv[k][0]++;
+					}
+					if (u == k) {
+						yuv[k][1]++;
+					}
+					if (v == k) {
+						yuv[k][2]++;
+					}
+				}
+			}
+		}
+		
+		/*//Check output with yuv format 
+		for (int i = 0; i < 256; i++) {
+			System.out.println("yuvY" + i + ":" + yuv[i][0]);
+			System.out.println("yuvU" + i + ":" + yuv[i][1]);
+			System.out.println("yuvV" + i + ":" + yuv[i][2]);
+		}
+		*/
+		
+		return yuv;
 	}
 
 }
