@@ -1,7 +1,7 @@
 import java.util.ArrayList;
 import java.util.Random;
 
-public class KKmeans {
+public class Kmeans {
 
     private final int           NUM_CLUSTERS = 2;                        // Total
                                                                           // clusters
@@ -278,8 +278,8 @@ public class KKmeans {
     }
 
     public static void main(String[] args) {
-        int[][] array = new int[3][2];
-        Test t = new Test();
+        int[][] array = new int[300][256];
+        Kmeans t = new Kmeans();
         t.kmeans(array);
     }
 }
