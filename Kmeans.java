@@ -13,15 +13,15 @@ public class Kmeans {
     private ArrayList<Centroid> centroids    = new ArrayList<Centroid>();
 
     // [300][256] gray scale 256 levels, 300 pictures
-    public void kmeans(int y[][]) {
+    public ArrayList kmeans(int y[][]) {
         // Randomly choose two cluster
         Random rand = new Random();
         int cluster1 = rand.nextInt(300);
         int cluster2 = rand.nextInt(300);
         System.out.println(cluster1);
         System.out.println(cluster2);
-        centroids.add(new Centroid(y[cluster1])); // lowest set.
-        centroids.add(new Centroid(y[cluster2])); // highest set.
+        centroids.add(new Centroid(y[cluster1]));
+        centroids.add(new Centroid(y[cluster2]));
         //
         // // find two individuals furthest apart, the smallest sum is the min
         // System.out.println(y.length);
@@ -53,7 +53,7 @@ public class Kmeans {
         // }
 
         // 分類
-        kMeanCluster(y);
+        return kMeanCluster(y);
     }
 
     // private static void initialize() {
@@ -74,7 +74,7 @@ public class Kmeans {
     // return;
     // }
 
-    private void kMeanCluster(int y[][]) {
+    private ArrayList kMeanCluster(int y[][]) {
         final double bigNumber = Math.pow(10, 10); // some big number that's
         // sure to be larger than our
         // data range.
@@ -185,12 +185,12 @@ public class Kmeans {
                 }
             }
         }
-        return;
+        return dataSet;
     }
 
     /**
      * // Calculate Euclidean distance.
-     * 
+     *
      * @param d
      *            - Data object.
      * @param c
