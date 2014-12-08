@@ -174,8 +174,8 @@ public class imageReader {
 		}
 		
 		/*Transmit data array after histogram to do cluster*/
-		Kmeans km = new Kmeans(frameHtgT);
-		dataSet = km.kmeans();
+		Kmeans km = new Kmeans(frameHtgT,2);
+		dataSet = km.start();
 		int a=0, b=0;
 		 for (int j = 0; j < dataSet.size(); j++) {
              if (dataSet.get(j).cluster() == 0) { 
