@@ -3,85 +3,36 @@ import java.util.Random;
 
 public class Kmeans {
 
-    private final int           NUM_CLUSTERS = 2;                        // Total
-                                                                          // clusters
-    private final int           TOTAL_DATA;                      		 // Total
-                                                                          // data
-                                                                          // points
+    private final int NUM_CLUSTERS;  // the number of clusters
+    private final int TOTAL_DATA;    // Total data points(how many pictures)
+    private final int y[][];         // multiple one dimensional Y array
 
-    private ArrayList<Data> dataSet = new ArrayList<Data>();
-    private ArrayList<Centroid> centroids = new ArrayList<Centroid>();
-    private int y[][];
+    private ArrayList<Data> dataSet = new ArrayList<Data>(); // store every data
+    private ArrayList<Centroid> centroids = new ArrayList<Centroid>(); // store centroids
 
     // Constructor
-    public Kmeans(int x[][]){
-    	this.TOTAL_DATA = x.length;
-      y=x;
+    public Kmeans(int y[][], int numCluster){
+    	this.TOTAL_DATA = y.length;
+        this.y = y;
+        NUM_CLUSTERS = numCluster;
     }
 
-    // [300][256] gray scale 256 levels, 300 pictures
-    public ArrayList<Data> kmeans() {
-        // Randomly choose two cluster
+    public ArrayList<Data> start() {
+        // Randomly choose centroids and add to ArrayList
         Random rand = new Random();
-        int cluster1 = rand.nextInt(y.length);
-        int cluster2 = rand.nextInt(y.length);
-        System.out.println(cluster1);
-        System.out.println(cluster2);
-        centroids.add(new Centroid(y[cluster1]));
-        centroids.add(new Centroid(y[cluster2]));
-        //
-        // // find two individuals furthest apart, the smallest sum is the min
-        // System.out.println(y.length);
-        // int row_sum[] = new int[y.length];
-        // for (int i = 0; i < y.length; i++) {
-        // row_sum[i] = 0;
-        // }
-        // for (int i = 0; i < y.length; i++) {
-        // for (int j = 0; j < y[i].length; j++) {
-        // row_sum[i] += y[i][j];
-        // }
-        // }
-        // // brute force find min and max
-        // int min = 0, max = 0, min_level = -1, max_level = -1;
-        // // initial
-        // min = row_sum[0];
-        // max = row_sum[0];
-        // min_level = 0;
-        // max_level = 0;
-        // for (int i = 0; i < row_sum.length; i++) {
-        // if (row_sum[i] < min) {
-        // min = row_sum[i];
-        // min_level = i;
-        // }
-        // if (row_sum[i] > max) {
-        // max = row_sum[i];
-        // max_level = i;
-        // }
-        // }
-
-        // 分類
-        return kMeanCluster(y);
+        for(int i = 0 ; i< NUM_CLUSTERS ; i++){
+            int rm = rand.nextInt(y.length);
+            double[] tmp = new double[y[0].length];
+            for(int j = 0 ; j < tmp.length ; j++){ // int array to double array
+                tmp[j] = y[rm][j];
+            }
+            centroids.add(new Centroid(tmp));
+        }
+        // Clustering
+        return cluster();
     }
 
-    // private static void initialize() {
-    // System.out.println("Centroids initialized at:");
-    // centroids.add(new Centroid(1.0, 1.0)); // lowest set.
-    // centroids.add(new Centroid(5.0, 7.0)); // highest set.
-    // System.out.println("     ("
-    // + centroids.get(0).X()
-    // + ", "
-    // + centroids.get(0).Y()
-    // + ")");
-    // System.out.println("     ("
-    // + centroids.get(1).X()
-    // + ", "
-    // + centroids.get(1).Y()
-    // + ")");
-    // System.out.print("\n");
-    // return;
-    // }
-
-    private ArrayList<Data> kMeanCluster(int y[][]) {
+    private ArrayList<Data> cluster() {
         final double bigNumber = Math.pow(10, 10); // some big number that's
         // sure to be larger than our
         // data range.
@@ -106,71 +57,15 @@ public class Kmeans {
                 }
             }
             newData.cluster(cluster);
-
-            // calculate new centroids.
-            for (int i = 0; i < NUM_CLUSTERS; i++) {
-                // int totalX = 0;
-                // int totalY = 0;
-                int totalInCluster = 0; // how many in a cluster
-                int[] total = new int[256];
-                // initial
-                for (int j = 0; j < total.length; j++) {
-                    total[j] = 0;
-                }
-                for (int j = 0; j < dataSet.size(); j++) {
-                    if (dataSet.get(j).cluster() == i) { // if it belongs to
-                                                         // cluster i
-                        int[] data = dataSet.get(j).pos();
-                        for (int k = 0; k < data.length; k++) {
-                            total[k] += data[k];
-                        }
-                        // totalX += dataSet.get(j).X();
-                        // totalY += dataSet.get(j).Y();
-                        totalInCluster++;
-                    }
-                }
-                if (totalInCluster > 0) {
-                    for (int j = 0; j < total.length; j++) {
-                        total[j] = total[j] / totalInCluster;
-                    }
-                    centroids.get(i).pos(total);
-                    // centroids.get(i).X(totalX / totalInCluster);
-                    // centroids.get(i).Y(totalY / totalInCluster);
-                }
-            }
+            // calculate new centroids
+            update();
             sampleNumber++;
         }
 
         // Now, keep shifting centroids until equilibrium occurs.
         while (isStillMoving) {
             // calculate new centroids.
-            for (int i = 0; i < NUM_CLUSTERS; i++) {
-                int totalInCluster = 0; // how many in a cluster
-                int[] total = new int[256];
-                // initial
-                for (int j = 0; j < total.length; j++) {
-                    total[j] = 0;
-                }
-                for (int j = 0; j < dataSet.size(); j++) {
-                    if (dataSet.get(j).cluster() == i) {
-                        // totalX += dataSet.get(j).X();
-                        // totalY += dataSet.get(j).Y();
-                        int[] data = dataSet.get(j).pos();
-                        for (int k = 0; k < data.length; k++) {
-                            total[k] += data[k];
-                        }
-                        totalInCluster++;
-                    }
-                }
-                if (totalInCluster > 0) {
-                    for (int j = 0; j < total.length; j++) {
-                        total[j] = total[j] / totalInCluster;
-                    }
-                    centroids.get(i).pos(total);
-                    // centroids.get(i).X(totalX / totalInCluster);
-                    // centroids.get(i).Y(totalY / totalInCluster);
-                }
-            }
+            update();
 
             // Assign all data to the new centroids
             isStillMoving = false;
@@ -195,18 +90,45 @@ public class Kmeans {
         return dataSet;
     }
 
-    /**
-     * // Calculate Euclidean distance.
-     *
-     * @param d
-     *            - Data object.
-     * @param c
-     *            - Centroid object.
-     * @return - double value.
-     */
-    private double dist(Data d, Centroid c) {
+    // Update centroids
+    private void update(){
+        // calculate new centroids.
+        for (int i = 0; i < NUM_CLUSTERS; i++) {
+            int totalInCluster = 0; // how many in a cluster
+            int[] total = new int[256];
+            double[] rslt = new double[256];
+
+            // initial
+            for (int j = 0; j < total.length; j++) {
+                total[j] = 0;
+                rslt[j] = 0;
+            }
+
+            for (int j = 0; j < dataSet.size(); j++) {
+                if (dataSet.get(j).cluster() == i) { // if it belongs to
+                    // cluster i
+                    int[] data = dataSet.get(j).pos();
+                    for (int k = 0; k < data.length; k++) {
+                        total[k] += data[k];
+                    }
+                    totalInCluster++;
+                }
+            }
+
+            if (totalInCluster > 0) {
+                for (int j = 0; j < total.length; j++) {
+                    rslt[j] = total[j] / (double)totalInCluster;
+                }
+                centroids.get(i).pos(rslt);
+            }
+        }
+
+    }
+
+    // Calculate Euclidean distance.
+    private static double dist(Data d, Centroid c) {
         int[] pos_data = d.pos();
-        int[] pos_centroid = c.pos();
+        double[] pos_centroid = c.pos();
         int sum_square = 0;
         if (pos_data.length != pos_centroid.length) {
             System.out.println("different");
@@ -219,9 +141,9 @@ public class Kmeans {
     }
 
     public static void main(String[] args) {
-        int[][] array = new int[300][256];
+        //int[][] array = new int[300][256];
         //For test
-        Kmeans t = new Kmeans(array);
-        t.kmeans(array);
+        //Kmeans t = new Kmeans(array);
+        //t.kmeans();
     }
 }
