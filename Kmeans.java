@@ -5,19 +5,26 @@ public class Kmeans {
 
     private final int           NUM_CLUSTERS = 2;                        // Total
                                                                           // clusters
-    private final int           TOTAL_DATA   = 300;                      // Total
+    private final int           TOTAL_DATA;                      		 // Total
                                                                           // data
                                                                           // points
 
-    private ArrayList<Data>     dataSet      = new ArrayList<Data>();
-    private ArrayList<Centroid> centroids    = new ArrayList<Centroid>();
+    private ArrayList<Data> dataSet = new ArrayList<Data>();
+    private ArrayList<Centroid> centroids = new ArrayList<Centroid>();
+    private int y[][];
+
+    // Constructor
+    public Kmeans(int x[][]){
+    	this.TOTAL_DATA = x.length;
+      y=x;
+    }
 
     // [300][256] gray scale 256 levels, 300 pictures
-    public ArrayList kmeans(int y[][]) {
+    public ArrayList<Data> kmeans() {
         // Randomly choose two cluster
         Random rand = new Random();
-        int cluster1 = rand.nextInt(300);
-        int cluster2 = rand.nextInt(300);
+        int cluster1 = rand.nextInt(y.length);
+        int cluster2 = rand.nextInt(y.length);
         System.out.println(cluster1);
         System.out.println(cluster2);
         centroids.add(new Centroid(y[cluster1]));
@@ -74,7 +81,7 @@ public class Kmeans {
     // return;
     // }
 
-    private ArrayList kMeanCluster(int y[][]) {
+    private ArrayList<Data> kMeanCluster(int y[][]) {
         final double bigNumber = Math.pow(10, 10); // some big number that's
         // sure to be larger than our
         // data range.
@@ -211,75 +218,10 @@ public class Kmeans {
         return Math.sqrt(sum_square);
     }
 
-    private static class Data {
-        private int[] pos;
-        private int   mCluster = 0;
-
-        public Data() {
-        }
-
-        public Data(int[] pos) {
-            this.pos(pos);
-        }
-
-        public void pos(int[] pos) {
-            this.pos = pos;
-        }
-
-        public int[] pos() {
-            return this.pos;
-        }
-
-        public void cluster(int clusterNumber) {
-            this.mCluster = clusterNumber;
-        }
-
-        public int cluster() {
-            return this.mCluster;
-        }
-    }
-
-    private static class Centroid {
-        private int[] pos;
-
-        public Centroid() {
-        }
-
-        public Centroid(int[] pos) {
-            this.pos = pos;
-            return;
-        }
-
-        public void pos(int[] pos) {
-            this.pos = pos;
-        }
-
-        public int[] pos() {
-            return this.pos;
-        }
-
-        // public void X(double newX) {
-        // this.mX = newX;
-        // return;
-        // }
-        //
-        // public double X() {
-        // return this.mX;
-        // }
-        //
-        // public void Y(double newY) {
-        // this.mY = newY;
-        // return;
-        // }
-        //
-        // public double Y() {
-        // return this.mY;
-        // }
-    }
-
     public static void main(String[] args) {
         int[][] array = new int[300][256];
-        Kmeans t = new Kmeans();
+        //For test
+        Kmeans t = new Kmeans(array);
         t.kmeans(array);
     }
 }
