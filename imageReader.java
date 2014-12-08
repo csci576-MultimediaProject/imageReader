@@ -51,7 +51,7 @@ public class imageReader {
 		int frameRate = 30; /* frameRate is 30 */
 		
 		JFrame frame = new JFrame("Image Collage");
-		frame.setVisible(true);
+		//frame.setVisible(true);
 		JPanel panel = new JPanel(new GridLayout((counter / 10), 10));
 		
 		
@@ -107,7 +107,9 @@ public class imageReader {
 					framebutton.setContentAreaFilled(false);
 					panel.add(framebutton);
 					frame.getContentPane().add(panel, BorderLayout.CENTER);
-					frame.pack();
+					frame.setSize(800,700);
+					frame.setVisible(true);
+					//frame.pack();
 					
 					framebutton.addActionListener(new ActionListener() {
 						@Override
