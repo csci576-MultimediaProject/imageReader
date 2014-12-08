@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.border.LineBorder;
 
 
 public class imageReader {
@@ -18,13 +20,11 @@ public class imageReader {
 
 	public static void main(String[] args) {
 		
-		/*Section Variable declaration*/
 		final File dir = new File(args[0]);
 		int width = 352;
 		int height = 288;
+		int row = 0;
 		imageReader imr = new imageReader();
-		
-		
 
 		/* array of supported extensions */
 		final String[] EXTENSIONS = new String[] { 
@@ -44,21 +44,23 @@ public class imageReader {
 			}
 		};
 
-		if (dir.isDirectory()) { /* make sure it's a directory */
+		if (dir.isDirectory()) { /* count how many files are there in the folder */
 			for (final File file : dir.listFiles(IMAGE_FILTER)) {
 				counter++;
 			}
-			System.out.println("total file in this folder : " + counter);	/*Check the total number of files in folder*/
+			//System.out.println("total file in this folder : " + counter);
 		}
 
-		int frameRate = 30; /* frameRate is 30 */
+		if((counter % 10) == 0) /* use counter to control gridlayout format*/
+			row = counter/10; 
+		else
+			row = (counter/10) + 1; 
 		
-		JFrame frame = new JFrame("Image Collage");
+		JFrame frame = new JFrame("Image Collage"); /* new a frame to display the files in the folder */
 		//frame.setVisible(true);
-		JPanel panel = new JPanel(new GridLayout((counter / 10), 10));
+		JPanel panel = new JPanel(new GridLayout( row , 10)); /* add a panel to the frame (using gridlayout) */
 		
-		
-		for (final File file : dir.listFiles(IMAGE_FILTER)) {
+		for (final File file : dir.listFiles(IMAGE_FILTER)) { /*forloop: the total number of files */
 
 			try {
 				InputStream is = new FileInputStream(file);
@@ -67,8 +69,7 @@ public class imageReader {
 				// System.out.println("File length : " + len); /* Print input file size */
 				double framelen = (len / (width * height * 3)); /* Calculate inputfile's frames */
 				// System.out.println("Numbers of frames : " + framelen); /* Print input file's frames */
-				final BufferedImage frameA[] = new BufferedImage[(int) framelen]; /* Set the frame array */
-				int[][][] frameHtg = new int[counter][256][3]; /*Store the value of frameA after Histogram. The number of files is from counter.*/
+				BufferedImage frameA[] = new BufferedImage[(int) framelen]; /* Set the frame array */
 
 				byte[] bytes = new byte[(int) len];
 
@@ -99,11 +100,9 @@ public class imageReader {
 					//System.out.println(" height" + i + " : " + frameA[i].getHeight());
 				}
 
-				//System.out.println("image: " + file.getName());
-				//System.out.println(" size  : " + file.length());
+				// System.out.println("image: " + file.getName());
+				// System.out.println(" size  : " + file.length());
 				// imr.histogram(frameA[0]);
-				// imr.display(frameA);
-				
 				
 				/*Obtain each frame's histogram*/
 				for(int i = 0; i < frameA.length; i++){
@@ -121,53 +120,77 @@ public class imageReader {
 				/*Sent data array after histogram to do cluster*/
 				Kmeans km = new Kmeans();
 
-				
-				/*Display*/
-				for ( int j = 0; j < frameA.length; j++) {
-					//JLabel label = new JLabel(new StretchIcon(frameA[j]));
-					JButton framebutton = new JButton(new StretchIcon(frameA[j]));
-					framebutton.setBorder(BorderFactory.createEmptyBorder());
-					framebutton.setContentAreaFilled(false);
-					panel.add(framebutton);
+				if (frameA.length > 1){ /* if the file is a video, create its first frame as button in Image Collage display */
+					JButton frameVideobutton = new JButton(new StretchIcon(frameA[0]));
+					frameVideobutton.setBorder(BorderFactory.createEmptyBorder());
+					frameVideobutton.setContentAreaFilled(true);
+					panel.add(frameVideobutton);
 					frame.getContentPane().add(panel, BorderLayout.CENTER);
 					frame.setSize(800,700);
 					frame.setVisible(true);
-					//frame.pack();
 					
-					framebutton.addActionListener(new ActionListener() {
+					frameVideobutton.addActionListener(new ActionListener() { /* if button click, call display function to play the clicked video*/
 						@Override
 						public void actionPerformed(ActionEvent e) {
 							// TODO Auto-generated method stub
-							System.out.println("image: " + file.getName() +" is Clicked");
-							JFrame showframe = new JFrame("image: " + file.getName());
-							for (int i = 0; i < frameA.length; i++) {
-								JLabel showlabel = new JLabel(new ImageIcon(frameA[i]));
-								showframe.getContentPane().add(showlabel, BorderLayout.CENTER);
-								showframe.pack();
-								showframe.setVisible(true);
-							}
+							imr.display(frameA);
 						}
 			        }); 
+				}else{
+					/* if the file is an image, create it as a button in Image Collage display */
+					JButton framebutton = new JButton(new StretchIcon(frameA[0]));
+					framebutton.setBorder(BorderFactory.createEmptyBorder());
+					framebutton.setContentAreaFilled(true);
+					panel.add(framebutton);
+					frame.getContentPane().add(panel, BorderLayout.CENTER);
+					frame.setSize(800, 700);
+					frame.setVisible(true);
 
-					/* Determine the frame rate */
-					try {
-						Thread.sleep(1000 / frameRate);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					framebutton.addActionListener(new ActionListener() { /* if button click, call display function to display the clicked original image*/
+						@Override
+						public void actionPerformed(ActionEvent e) {
+							// TODO Auto-generated method stub
+							imr.display(frameA);
+						}
+					});
 
-					/* Determine not to remove last image */
-					if (j < frameA.length - 1) {
-						frame.getContentPane().removeAll();
-					}
 				}
+				
 			} catch (final IOException e) {
 				/* handle errors here */
 			}
 		}
 		
 
+	}
+	
+	/* Function display the image */
+	public void display(BufferedImage[] img) {
+		/* Use a label to display the image */
+		
+		int frameRate = 30; /* frameRate is 30 */
+		JFrame frame = new JFrame();
+		frame.setTitle(" Original Image/Video ");
+		frame.setVisible(true);
+		
+		for (int i = 0; i < img.length; i++) {
+			JLabel label = new JLabel(new ImageIcon(img[i]));
+			frame.getContentPane().add(label, BorderLayout.CENTER);
+			frame.pack();
+
+			/* Determine the frame rate */
+			try {
+				Thread.sleep(1000 / frameRate);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
+			/* Determine not to remove last image */
+			if (i < img.length - 1) {
+				frame.getContentPane().removeAll();
+			}
+		}
 	}
 
 	// Function Extract Pixel's each rgb
