@@ -18,10 +18,13 @@ public class imageReader {
 
 	public static void main(String[] args) {
 		
+		/*Section Variable declaration*/
 		final File dir = new File(args[0]);
 		int width = 352;
 		int height = 288;
 		imageReader imr = new imageReader();
+		
+		
 
 		/* array of supported extensions */
 		final String[] EXTENSIONS = new String[] { 
@@ -45,7 +48,7 @@ public class imageReader {
 			for (final File file : dir.listFiles(IMAGE_FILTER)) {
 				counter++;
 			}
-			System.out.println("total file in this folder : " + counter);
+			System.out.println("total file in this folder : " + counter);	/*Check the total number of files in folder*/
 		}
 
 		int frameRate = 30; /* frameRate is 30 */
@@ -64,7 +67,8 @@ public class imageReader {
 				// System.out.println("File length : " + len); /* Print input file size */
 				double framelen = (len / (width * height * 3)); /* Calculate inputfile's frames */
 				// System.out.println("Numbers of frames : " + framelen); /* Print input file's frames */
-				BufferedImage frameA[] = new BufferedImage[(int) framelen]; /* Set the frame array */
+				final BufferedImage frameA[] = new BufferedImage[(int) framelen]; /* Set the frame array */
+				int[][][] frameHtg = new int[counter][256][3]; /*Store the value of frameA after Histogram. The number of files is from counter.*/
 
 				byte[] bytes = new byte[(int) len];
 
@@ -99,7 +103,26 @@ public class imageReader {
 				//System.out.println(" size  : " + file.length());
 				// imr.histogram(frameA[0]);
 				// imr.display(frameA);
-			
+				
+				
+				/*Obtain each frame's histogram*/
+				for(int i = 0; i < frameA.length; i++){
+					frameHtg[i] = imr.histogram(frameA[i]);
+				}
+				
+				/*Transfer frameHtg from 3-way into 2-way array with value y. */
+				int[][] frameHtgT = new int[counter][256];
+				for(int i=0; i < 300; i++){
+					for(int j=0; j <256; j++){
+						frameHtgT[i][j] = frameHtg[i][j][0];
+					}
+				}
+				
+				/*Sent data array after histogram to do cluster*/
+				Kmeans km = new Kmeans();
+
+				
+				/*Display*/
 				for ( int j = 0; j < frameA.length; j++) {
 					//JLabel label = new JLabel(new StretchIcon(frameA[j]));
 					JButton framebutton = new JButton(new StretchIcon(frameA[j]));
@@ -139,9 +162,6 @@ public class imageReader {
 						frame.getContentPane().removeAll();
 					}
 				}
-				
-				 
-
 			} catch (final IOException e) {
 				/* handle errors here */
 			}
